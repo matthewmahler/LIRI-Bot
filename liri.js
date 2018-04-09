@@ -57,7 +57,22 @@ function searchMovie() {
   request(queryUrl, function (error, response, body) {
     if (!error && response.statusCode === 200) {
       console.log(JSON.parse(body));
-      logEverything(body);
+      fs.appendFile("log.txt",
+        "============================================================================================================"
+        + "\n" +
+        "MOVIE REQUEST: " + movieName
+        + "\n" +
+        body
+        + "\n" +
+        "============================================================================================================"
+        + "\n",
+        function (err) {
+          if (err) {
+            console.log(err);
+          } else {
+            console.log("Logged");
+          }
+        });
     }
   });
 };
@@ -75,22 +90,44 @@ function getMyTweets() {
     access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
   });
   var name = process.argv[3]
+  fs.appendFile("log.txt", "============================================================================================================" + "\n" +
+    "TWEET REQUEST: " + name
+    + "\n",
+    function (err) {
+      if (err) {
+        console.log(err);
+      }
+    });
   console.log(name)
   var params = {
     screen_name: name
   };
   client.get('statuses/user_timeline', params, function (error, tweets, response) {
     if (!error) {
-      for (var i = 0; i < 20; i++) {
+      for (var i = 0; i < tweets.length; i++) {
         console.log(tweets[i].created_at)
         console.log(" ")
         console.log(tweets[i].text)
         console.log("==================================================================")
-        logEverything(tweets[i]);
-      }      
+        fs.appendFile("log.txt", tweets[i].text + "\n" + "\n", function (err) {
+          if (err) {
+            console.log(err);
+          }
+        });
+      }
+      fs.appendFile("log.txt", "============================================================================================================" + "\n", function (err) {
+        if (err) {
+          console.log(err);
+        }
+      });
     }
+
   });
+
 }
+
+
+
 
 //==============//
 //Spotify Things//
@@ -113,42 +150,35 @@ function spotifyThis() {
       return;
     } else {
       var songInfo = data.tracks.items[0];
-      console.log(" ")
-      console.log(songInfo.artists[0].name)
-      console.log(" ")
-      console.log(songInfo.name)
-      console.log(" ")
-      console.log(songInfo.preview_url)
-      console.log(" ")
-      console.log(songInfo.album.name)
-      console.log(" ")
-      console.log("==================================================================")
-      logEverything(songInfo);
+      console.log(" ");
+      console.log(songInfo.artists[0].name);
+      console.log(" ");
+      console.log(songInfo.name);
+      console.log(" ");
+      console.log(songInfo.preview_url);
+      console.log(" ");
+      console.log(songInfo.album.name);
+      console.log(" ");
+      console.log("==================================================================");
+      fs.appendFile("log.txt",
+        "============================================================================================================"
+        + "\n" +
+        "SPOTIFY SEARCH: " + trackName
+        + "\n" +
+        "Artist: " + songInfo.artists[0].name
+        + "\n" +
+        "Song: " + songInfo.name
+        + "\n" +
+        "============================================================================================================"
+        + "\n",
+        function (err) {
+          if (err) {
+            console.log(err);
+          } else {
+            console.log("Logged");
+          }
+        });
     };
   });
-  
-}
 
-//==============//
-//Log Everything//
-//==============//
-
-//this part doesnt really work yet
-
-function logEverything(body, tweets, songInfo) {
-  if (process.argv[2] === "my-tweets") {
-   var masterLog = tweets
-  } else if (process.argv[2] === "spotify-this-song") {
-    var masterLog = songInfo
-  } else if (process.argv[2] === "movie-this") {
-    var masterLog = body
-  } 
-  fs.appendFile("log.txt", masterLog, function (err) {
-    if (err) {
-      console.log(err);
-    }
-    else {
-      console.log("Logged");
-    }
-  });
 }
